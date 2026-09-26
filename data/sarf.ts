@@ -225,10 +225,10 @@ export const STARTER_VERBS: Verb[] = [
   { id:"f5v3", root:"ف-ك-ر", form:5, madi:"تَفَكَّرَ", mudari:"يَتَفَكَّرُ", masdar:"تَفَكُّر",    ismFail:"مُتَفَكِّر",                        meaningEn:"he contemplated",   verbType:"salim", isTransitive:false, isQuranic:true },
   { id:"f5v4", root:"ذ-ك-ر", form:5, madi:"تَذَكَّرَ", mudari:"يَتَذَكَّرُ", masdar:"تَذَكُّر",    ismFail:"مُتَذَكِّر",                        meaningEn:"he remembered",     verbType:"salim", isTransitive:false, isQuranic:true },
   // ─── Form VI (تَفَاعَلَ) ───
-  { id:"f6t",  root:"ب-ع-د", form:6, madi:"تَبَاعَدَ", mudari:"يَتَبَاعَدُ", masdar:"تَبَاعُد",    ismFail:"مُتَبَاعِد",                        meaningEn:"they distanced",    verbType:"salim", isTransitive:false, isQuranic:false },
-  { id:"f6v1", root:"ب-ر-ك", form:6, madi:"تَبَارَكَ", mudari:"يَتَبَارَكُ", masdar:"تَبَارُك",    ismFail:"مُتَبَارِك",                        meaningEn:"he was blessed",    verbType:"salim", isTransitive:false, isQuranic:true },
-  { id:"f6v2", root:"ن-ص-ر", form:6, madi:"تَنَاصَرَ", mudari:"يَتَنَاصَرُ", masdar:"تَنَاصُر",    ismFail:"مُتَنَاصِر",                        meaningEn:"they helped each other", verbType:"salim", isTransitive:false, isQuranic:false },
-  { id:"f6v3", root:"ب-د-ل", form:6, madi:"تَبَادَلَ", mudari:"يَتَبَادَلُ", masdar:"تَبَادُل",    ismFail:"مُتَبَادِل",                        meaningEn:"they exchanged",    verbType:"salim", isTransitive:false, isQuranic:false },
+  { id:"f6t",  root:"ب-ع-د", form:6, madi:"تَبَاعَدَ", mudari:"يَتَبَاعَدُ", masdar:"تَبَاعُد",    ismFail:"مُتَبَاعِد",                        meaningEn:"to keep apart from one another", verbType:"salim", isTransitive:false, isQuranic:false },
+  { id:"f6v1", root:"ب-ر-ك", form:6, madi:"تَبَارَكَ", mudari:"يَتَبَارَكُ", masdar:"تَبَارُك",    ismFail:"مُتَبَارِك",                        meaningEn:"to be abundantly blessed", verbType:"salim", isTransitive:false, isQuranic:true },
+  { id:"f6v2", root:"ن-ص-ر", form:6, madi:"تَنَاصَرَ", mudari:"يَتَنَاصَرُ", masdar:"تَنَاصُر",    ismFail:"مُتَنَاصِر",                        meaningEn:"to support one another", verbType:"salim", isTransitive:false, isQuranic:false },
+  { id:"f6v3", root:"ب-د-ل", form:6, madi:"تَبَادَلَ", mudari:"يَتَبَادَلُ", masdar:"تَبَادُل",    ismFail:"مُتَبَادِل",                        meaningEn:"to exchange mutually", verbType:"salim", isTransitive:false, isQuranic:false },
   // ─── Form VII (اِنْفَعَلَ) ───
   { id:"f7t",  root:"ك-س-ر", form:7, madi:"اِنْكَسَرَ", mudari:"يَنْكَسِرُ", masdar:"اِنْكِسَار",  ismFail:"مُنْكَسِر",                        meaningEn:"it broke",          verbType:"salim", isTransitive:false, isQuranic:false },
   { id:"f7v1", root:"ف-ت-ح", form:7, madi:"اِنْفَتَحَ", mudari:"يَنْفَتِحُ", masdar:"اِنْفِتَاح",  ismFail:"مُنْفَتِح",                        meaningEn:"it opened",         verbType:"salim", isTransitive:false, isQuranic:false },
