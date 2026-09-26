@@ -1,4 +1,5 @@
 import { SKILLS } from "./curriculum";
+import type { Exercise } from "./curriculum";
 
 export type QuestionType =
   | "ar-to-en"      // Show Arabic → pick English
@@ -7,6 +8,7 @@ export type QuestionType =
   | "root-to-word"  // Show root → pick a word from it
   | "verse-fill"    // Quranic verse with blank → pick the missing word
   | "true-false"    // Arabic grammar statement → correct or not
+  | "exercise"      // Skill-specific hand-authored exercise
 
 export interface DrillQuestion {
   type: QuestionType;
@@ -111,6 +113,19 @@ function makeRootIdentify(entry: VocabEntry): DrillQuestion | null {
     options,
     explanation: `The root of ${entry.arabic} is ${entry.root} — it carries the core meaning.`,
     skillId: entry.skillId,
+  };
+}
+
+function makeExercise(ex: Exercise, skillId: number): DrillQuestion | null {
+  if (!ex.options || ex.options.length < 2) return null;
+  const options = shuffle([...ex.options]);
+  return {
+    type: "exercise",
+    prompt: ex.prompt,
+    answer: ex.answer,
+    options,
+    explanation: `Correct: ${ex.answer}`,
+    skillId,
   };
 }
 
@@ -271,27 +286,43 @@ export function generateSession(
   targetSkillIds: number[] | "all",
   count = 10
 ): DrillQuestion[] {
-  const pool =
-    targetSkillIds === "all"
-      ? POOL
-      : POOL.filter((v) => (targetSkillIds as number[]).includes(v.skillId));
+  const isAll = targetSkillIds === "all";
+  const ids = isAll ? null : (targetSkillIds as number[]);
 
+  const pool = ids ? POOL.filter(v => ids.includes(v.skillId)) : POOL;
   if (pool.length === 0) return [];
 
-  const questions: DrillQuestion[] = [];
+  // Extra banks: when targeting specific skills, ONLY use questions from those skills
+  const verseFill = isAll
+    ? VERSE_FILL_BANK
+    : VERSE_FILL_BANK.filter(q => ids!.includes(q.skillId));
+  const trueFalse = isAll
+    ? TRUE_FALSE_BANK
+    : TRUE_FALSE_BANK.filter(q => ids!.includes(q.skillId));
 
-  // Mix question types
+  // Skill-specific exercises: when drilling a single skill, use its hand-authored exercises first
+  const exercises: DrillQuestion[] = [];
+  if (!isAll && ids!.length > 0) {
+    for (const id of ids!) {
+      const skill = SKILLS.find(s => s.id === id);
+      if (skill) {
+        for (const ex of skill.exercises) {
+          const q = makeExercise(ex, id);
+          if (q) exercises.push(q);
+        }
+      }
+    }
+  }
+
+  const extraBank = shuffle([...exercises, ...verseFill, ...trueFalse]);
   const generators = [makeArToEn, makeEnToAr, makeRootIdentify, makeRootToWord];
-
-  // Always start with a verse-fill or true-false for variety
-  const extraBank = shuffle([...VERSE_FILL_BANK, ...TRUE_FALSE_BANK]);
+  const questions: DrillQuestion[] = [];
   let extraUsed = 0;
-
   const shuffledPool = shuffle(pool);
   let pi = 0;
 
   while (questions.length < count) {
-    // Every ~3 vocab questions, throw in a verse-fill or true-false
+    // Every ~3 vocab questions, inject a skill-relevant extra
     if (questions.length > 0 && questions.length % 3 === 0 && extraUsed < extraBank.length) {
       questions.push(extraBank[extraUsed++]);
       continue;
@@ -303,10 +334,7 @@ export function generateSession(
     const genFns = shuffle(generators);
     for (const gen of genFns) {
       const q = gen(entry);
-      if (q) {
-        questions.push(q);
-        break;
-      }
+      if (q) { questions.push(q); break; }
     }
   }
 

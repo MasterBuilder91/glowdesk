@@ -58,6 +58,7 @@ function typeBadge(type: DrillQuestion["type"]) {
     "root-to-word":  { label: "Root → Word",        color: "#7B4F12" },
     "verse-fill":    { label: "Quranic Verse",      color: "#1A4F6E" },
     "true-false":    { label: "Grammar Rule",       color: "#4A1A6E" },
+    "exercise":      { label: "Skill Exercise",     color: "#5A2A6E" },
   };
   return map[type] ?? { label: "Drill", color: "#333" };
 }
@@ -135,6 +136,7 @@ function Hub({
   onBlaster,
   onBuilder,
   onAlphabet,
+  onHarakat,
   streak,
   totalDrilled,
 }: {
@@ -144,6 +146,7 @@ function Hub({
   onBlaster: () => void;
   onBuilder: () => void;
   onAlphabet: () => void;
+  onHarakat: () => void;
   streak: number;
   totalDrilled: number;
 }) {
@@ -213,10 +216,16 @@ function Hub({
             <div className="gdsk-game-desc">All 28 Arabic letters with name, transliteration, positional forms, and connection notes.</div>
             <div className="gdsk-game-tag" style={{ color: "#4A1A6E" }}>Reference</div>
           </div>
+          <div className="gdsk-game-card" onClick={onHarakat}>
+            <div className="gdsk-game-icon">حَرَكَات</div>
+            <div className="gdsk-game-title">Harakat Drill</div>
+            <div className="gdsk-game-desc">Tap the correct floating harakah bubble (fatḥa, kasra, ḍamma, sukūn) to vowelize each letter.</div>
+            <div className="gdsk-game-tag" style={{ color: "#7A1A6B" }}>Vowel marks</div>
+          </div>
           <Link href="/sarf" className="gdsk-game-card" style={{ textDecoration: "none", color: "inherit" }}>
             <div className="gdsk-game-icon" style={{ fontFamily: "serif" }}>الصَّرْف</div>
             <div className="gdsk-game-title">Sarf Trainer</div>
-            <div className="gdsk-game-desc">Conjugate 155+ verbs across all 10 forms, 14 pronoun slots, past/present/imperative, active/passive.</div>
+            <div className="gdsk-game-desc">Conjugate 181+ verbs across all 10 forms + quadriliteral, 14 pronoun slots, active/passive.</div>
             <div className="gdsk-game-tag" style={{ color: "#1A6B4A" }}>Morphology drill</div>
           </Link>
         </div>
@@ -812,6 +821,174 @@ function AlphabetRef({ onBack }: { onBack: () => void }) {
   );
 }
 
+// ── Harakat Drill (bubble game) ───────────────────────────────────────────────
+
+const HRKT_MARKS = [
+  { mark: "َ", name: "Fatḥa",  roman: "a",  display: "بَ" },
+  { mark: "ِ", name: "Kasra",   roman: "i",  display: "بِ" },
+  { mark: "ُ", name: "Ḍamma",   roman: "u",  display: "بُ" },
+  { mark: "ْ", name: "Sukūn",   roman: "°",  display: "بْ" },
+];
+
+interface HLetter { base: string; mark: string; }
+
+const HRKT_WORDS: { arabic: string; english: string; letters: HLetter[] }[] = [
+  { arabic: "نُور",   english: "light",      letters: [{base:"ن",mark:"ُ"},{base:"و",mark:""},{base:"ر",mark:""}] },
+  { arabic: "بَيْت", english: "house",  letters: [{base:"ب",mark:"َ"},{base:"ي",mark:"ْ"},{base:"ت",mark:""}] },
+  { arabic: "عِلْم", english: "knowledge", letters: [{base:"ع",mark:"ِ"},{base:"ل",mark:"ْ"},{base:"م",mark:""}] },
+  { arabic: "قَلَم", english: "pen",    letters: [{base:"ق",mark:"َ"},{base:"ل",mark:"َ"},{base:"م",mark:""}] },
+  { arabic: "رَجُل", english: "man",    letters: [{base:"ر",mark:"َ"},{base:"ج",mark:"ُ"},{base:"ل",mark:""}] },
+  { arabic: "يَوْم", english: "day",    letters: [{base:"ي",mark:"َ"},{base:"و",mark:"ْ"},{base:"م",mark:""}] },
+  { arabic: "مِنْ",        english: "from",   letters: [{base:"م",mark:"ِ"},{base:"ن",mark:"ْ"}] },
+  { arabic: "فِعْل", english: "verb",   letters: [{base:"ف",mark:"ِ"},{base:"ع",mark:"ْ"},{base:"ل",mark:""}] },
+  { arabic: "نَفْس", english: "soul",   letters: [{base:"ن",mark:"َ"},{base:"ف",mark:"ْ"},{base:"س",mark:""}] },
+  { arabic: "كِتَاب", english: "book", letters: [{base:"ك",mark:"ِ"},{base:"ت",mark:"َ"},{base:"ا",mark:""},{base:"ب",mark:""}] },
+  { arabic: "عَمَل", english: "work",   letters: [{base:"ع",mark:"َ"},{base:"م",mark:"َ"},{base:"ل",mark:""}] },
+  { arabic: "رَحِم", english: "mercy",  letters: [{base:"ر",mark:"َ"},{base:"ح",mark:"ِ"},{base:"م",mark:""}] },
+  { arabic: "صَبْر", english: "patience", letters: [{base:"ص",mark:"َ"},{base:"ب",mark:"ْ"},{base:"ر",mark:""}] },
+  { arabic: "قَلْب", english: "heart",  letters: [{base:"ق",mark:"َ"},{base:"ل",mark:"ْ"},{base:"ب",mark:""}] },
+  { arabic: "عَقْل", english: "mind",   letters: [{base:"ع",mark:"َ"},{base:"ق",mark:"ْ"},{base:"ل",mark:""}] },
+];
+
+const BASIC_MARKS = new Set(["َ", "ِ", "ُ", "ْ"]);
+
+// Bubble positions (top, right, bottom, left of center)
+const BUBBLE_POS = [
+  { top: "6%",  left: "50%", transform: "translateX(-50%)" },
+  { top: "50%", left: "88%", transform: "translateY(-50%)" },
+  { top: "78%", left: "50%", transform: "translateX(-50%)" },
+  { top: "50%", left: "6%",  transform: "translateY(-50%)" },
+];
+
+function HarakatDrill({ onBack }: { onBack: () => void }) {
+  const [wordIdx, setWordIdx] = useState(0);
+  const [letterIdx, setLetterIdx] = useState(0);
+  const [score, setScore] = useState(0);
+  const [wordsDone, setWordsDone] = useState(0);
+  const [bubbleState, setBubbleState] = useState<Record<string, "idle" | "hit" | "wrong">>({});
+  const [win, setWin] = useState(false);
+  const [locked, setLocked] = useState(false);
+
+  const word = HRKT_WORDS[wordIdx % HRKT_WORDS.length];
+  const drillable = word.letters.filter(l => BASIC_MARKS.has(l.mark));
+  const current = drillable[letterIdx];
+
+  function resetBubbles() { setBubbleState({}); }
+
+  function tap(mark: string) {
+    if (locked || !current) return;
+    setLocked(true);
+    const correct = mark === current.mark;
+    setBubbleState(prev => ({ ...prev, [mark]: correct ? "hit" : "wrong" }));
+    if (correct) {
+      setScore(s => s + 10);
+      setTimeout(() => {
+        resetBubbles();
+        const nextLi = letterIdx + 1;
+        if (nextLi >= drillable.length) {
+          setWin(true);
+          setWordsDone(w => w + 1);
+          setScore(s => s + 20);
+          setTimeout(() => {
+            setWin(false);
+            setWordIdx(i => i + 1);
+            setLetterIdx(0);
+            setLocked(false);
+          }, 1600);
+        } else {
+          setLetterIdx(nextLi);
+          setLocked(false);
+        }
+      }, 700);
+    } else {
+      setScore(s => Math.max(0, s - 5));
+      setTimeout(() => {
+        setBubbleState(prev => ({ ...prev, [mark]: "idle" }));
+        setLocked(false);
+      }, 500);
+    }
+  }
+
+  const markInfo = HRKT_MARKS.find(h => h.mark === current?.mark);
+
+  return (
+    <div className="hrkt-wrap">
+      <div className="hrkt-header">
+        <button onClick={onBack} style={{ background:"none", border:"none", color:"rgba(255,255,255,0.6)", fontSize:13, cursor:"pointer" }}>← exit</button>
+        <div style={{ textAlign:"center" }}>
+          <div style={{ fontSize:13, color:"rgba(255,255,255,0.5)", marginBottom:2 }}>Harakat Drill</div>
+          <div style={{ fontSize:18, fontWeight:700, color:"#FFD580" }}>{wordsDone} words · {score} pts</div>
+        </div>
+        <div style={{ width:48 }} />
+      </div>
+
+      {/* Target word */}
+      <div style={{ textAlign:"center", padding:"12px 0 4px" }}>
+        <div style={{ fontSize:12, color:"rgba(255,255,255,0.4)", textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:4 }}>
+          Vowelize: {word.english}
+        </div>
+        <div className="font-arabic hrkt-word-progress" dir="rtl">
+          {word.letters.map((l, i) => {
+            const di = drillable.findIndex(d => d === l);
+            const isDrillable = di >= 0;
+            const isRevealed = !isDrillable || di < letterIdx || win;
+            const isCurrent = isDrillable && di === letterIdx && !win;
+            return (
+              <span key={i} className={isCurrent ? "hrkt-current-letter" : ""} style={{ opacity: isRevealed || isCurrent ? 1 : 0.2, transition: "opacity 0.3s" }}>
+                {l.base}{isRevealed ? l.mark : ""}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Bubble field */}
+      <div className="hrkt-field">
+        {/* Center letter */}
+        <div className="hrkt-center font-arabic">
+          {current?.base ?? "✓"}
+        </div>
+
+        {/* 4 harakah bubbles */}
+        {!win && HRKT_MARKS.map((h, i) => {
+          const state = bubbleState[h.mark] ?? "idle";
+          return (
+            <button
+              key={h.mark}
+              className={`hrkt-bubble hrkt-bbl-${state}`}
+              style={{ ...BUBBLE_POS[i], animationDelay: `${i * 0.5}s` }}
+              onClick={() => tap(h.mark)}
+              disabled={locked}
+            >
+              <span className="font-arabic hrkt-bbl-ar">{h.display}</span>
+              <span className="hrkt-bbl-name">{h.name}</span>
+              <span className="hrkt-bbl-roman">{h.roman}</span>
+            </button>
+          );
+        })}
+
+        {win && (
+          <div className="hrkt-win">
+            <div className="font-arabic" style={{ fontSize:52, color:"#FFD580", direction:"rtl" }}>{word.arabic}</div>
+            <div style={{ fontSize:16, color:"#fff", marginTop:6 }}>{word.english}</div>
+            {markInfo && <div style={{ fontSize:13, color:"rgba(255,255,255,0.55)", marginTop:4 }}>+20 pts — next word…</div>}
+          </div>
+        )}
+      </div>
+
+      {/* Harakah key reference */}
+      <div className="hrkt-legend">
+        {HRKT_MARKS.map(h => (
+          <div key={h.mark} className="hrkt-legend-item">
+            <span className="font-arabic hrkt-legend-ar">{h.display}</span>
+            <span className="hrkt-legend-name">{h.name} · "{h.roman}"</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const STYLES = `
@@ -995,6 +1172,28 @@ const STYLES = `
   .gdsk-wb-demo { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; font-size: 22px; cursor: pointer; color: var(--ink); transition: border-color 0.12s; display: flex; flex-direction: column; align-items: center; gap: 2px; }
   .gdsk-wb-demo:hover { border-color: var(--accent); }
 
+  /* Harakat Drill */
+  .hrkt-wrap { min-height: calc(100vh - 56px); display: flex; flex-direction: column; align-items: stretch; background: radial-gradient(ellipse at 50% 20%, #1a0a2e 0%, #06030f 100%); color: #fff; }
+  .hrkt-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 5vw; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .hrkt-word-progress { font-size: clamp(36px,6vw,56px); line-height: 1.8; letter-spacing: 0.04em; color: #fff; margin: 0; display: flex; justify-content: center; gap: 2px; flex-direction: row-reverse; }
+  .hrkt-current-letter { color: #FFD580; filter: drop-shadow(0 0 8px rgba(255,213,128,0.6)); }
+  .hrkt-field { flex: 1; position: relative; min-height: 300px; max-height: 340px; margin: 16px 5vw 0; border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; background: rgba(255,255,255,0.02); }
+  .hrkt-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 80px; color: #fff; line-height: 1; pointer-events: none; filter: drop-shadow(0 0 16px rgba(255,255,255,0.15)); }
+  .hrkt-bubble { position: absolute; width: 86px; height: 86px; border-radius: 50%; background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; cursor: pointer; animation: gdsk-drift 3.5s ease-in-out infinite; transition: background 0.12s, border-color 0.12s; }
+  .hrkt-bubble:hover:not(:disabled) { background: rgba(255,255,255,0.15); border-color: rgba(255,213,128,0.5); }
+  .hrkt-bubble:disabled { cursor: default; }
+  .hrkt-bbl-ar { font-size: 30px; color: #fff; line-height: 1; pointer-events: none; }
+  .hrkt-bbl-name { font-size: 9px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em; pointer-events: none; }
+  .hrkt-bbl-roman { font-size: 11px; font-weight: 700; color: #FFD580; pointer-events: none; }
+  .hrkt-bbl-idle  { }
+  .hrkt-bbl-hit   { background: rgba(26,122,62,0.4) !important; border-color: #1A7A3E !important; animation: gdsk-boom 0.45s ease forwards !important; }
+  .hrkt-bbl-wrong { background: rgba(192,57,43,0.3) !important; border-color: #C0392B !important; animation: gdsk-shake 0.4s ease !important; }
+  .hrkt-win { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.72); backdrop-filter: blur(4px); animation: gdsk-pop 0.3s ease; border-radius: 20px; }
+  .hrkt-legend { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; padding: 14px 5vw 24px; }
+  .hrkt-legend-item { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 12px; }
+  .hrkt-legend-ar { font-size: 20px; color: #FFD580; }
+  .hrkt-legend-name { font-size: 11px; color: rgba(255,255,255,0.55); }
+
   /* Alphabet */
   .gdsk-alpha-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
   .gdsk-alpha-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 12px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: box-shadow 0.15s; }
@@ -1006,8 +1205,8 @@ const STYLES = `
   .gdsk-alpha-nc { font-size: 9px; color: #C4952A; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; background: rgba(196,149,42,0.1); padding: 2px 6px; border-radius: 4px; }
 
   /* Games hub section */
-  .gdsk-game-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
-  @media (max-width: 700px) { .gdsk-game-cards { grid-template-columns: 1fr; } }
+  .gdsk-game-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 16px; }
+  @media (max-width: 500px) { .gdsk-game-cards { grid-template-columns: 1fr; } }
   .gdsk-game-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 22px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; transition: box-shadow 0.18s, transform 0.18s; }
   .gdsk-game-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.09); transform: translateY(-2px); }
   .gdsk-game-icon { font-size: 32px; margin-bottom: 6px; }
@@ -1018,7 +1217,7 @@ const STYLES = `
 
 // ── Root ──────────────────────────────────────────────────────────────────────
 
-type Mode = "hub" | "lesson" | "drill" | "blaster" | "builder" | "alphabet";
+type Mode = "hub" | "lesson" | "drill" | "blaster" | "builder" | "alphabet" | "harakat";
 
 export default function LearnPage() {
   const [mode, setMode] = useState<Mode>("hub");
@@ -1094,6 +1293,7 @@ export default function LearnPage() {
           onBlaster={() => setMode("blaster")}
           onBuilder={() => setMode("builder")}
           onAlphabet={() => setMode("alphabet")}
+          onHarakat={() => setMode("harakat")}
           streak={streak}
           totalDrilled={totalDrilled}
         />
@@ -1115,9 +1315,10 @@ export default function LearnPage() {
         />
       )}
 
-      {mode === "blaster" && <LetterBlaster onBack={() => setMode("hub")} />}
-      {mode === "builder" && <WordBuilder onBack={() => setMode("hub")} />}
+      {mode === "blaster"  && <LetterBlaster onBack={() => setMode("hub")} />}
+      {mode === "builder"  && <WordBuilder onBack={() => setMode("hub")} />}
       {mode === "alphabet" && <AlphabetRef onBack={() => setMode("hub")} />}
+      {mode === "harakat"  && <HarakatDrill onBack={() => setMode("hub")} />}
     </>
   );
 }
