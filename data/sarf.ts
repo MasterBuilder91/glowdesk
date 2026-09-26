@@ -246,6 +246,26 @@ export const STARTER_VERBS: Verb[] = [
   { id:"f10v2", root:"ك-ب-ر", form:10, madi:"اِسْتَكْبَرَ", mudari:"يَسْتَكْبِرُ", masdar:"اِسْتِكْبَار", ismFail:"مُسْتَكْبِر", meaningEn:"he was arrogant",   verbType:"salim", isTransitive:false, isQuranic:true },
   { id:"f10v3", root:"ع-م-ل", form:10, madi:"اِسْتَعْمَلَ", mudari:"يَسْتَعْمِلُ", masdar:"اِسْتِعْمَال", ismFail:"مُسْتَعْمِل", ismMafool:"مُسْتَعْمَل", meaningEn:"he used", verbType:"salim", isTransitive:true, isQuranic:false },
   { id:"f10v4", root:"ق-ب-ل", form:10, madi:"اِسْتَقْبَلَ", mudari:"يَسْتَقْبِلُ", masdar:"اِسْتِقْبَال", ismFail:"مُسْتَقْبِل", ismMafool:"مُسْتَقْبَل", meaningEn:"he received", verbType:"salim", isTransitive:true, isQuranic:false },
+  // ─── Form IQ (فَعْلَلَ) — Quadriliterals ───
+  { id:"fiq_t",  root:"د-ح-ر-ج", form:11, madi:"دَحْرَجَ",  mudari:"يُدَحْرِجُ",  masdar:"دَحْرَجَة",  ismFail:"مُدَحْرِج",  ismMafool:"مُدَحْرَج", meaningEn:"to roll",                  verbType:"salim", isTransitive:true,  isQuranic:false },
+  { id:"fiq_1",  root:"ز-ل-ز-ل", form:11, madi:"زَلْزَلَ",  mudari:"يُزَلْزِلُ",  masdar:"زَلْزَلَة",  ismFail:"مُزَلْزِل",  ismMafool:"مُزَلْزَل", meaningEn:"to shake violently",       verbType:"salim", isTransitive:true,  isQuranic:true,  quranicReference:"99:1" },
+  { id:"fiq_2",  root:"و-س-و-س", form:11, madi:"وَسْوَسَ",  mudari:"يُوَسْوِسُ",  masdar:"وَسْوَسَة",  ismFail:"مُوَسْوِس",                         meaningEn:"to whisper/insinuate",     verbType:"salim", isTransitive:false, isQuranic:true,  quranicReference:"114:5" },
+  { id:"fiq_3",  root:"ب-ع-ث-ر", form:11, madi:"بَعْثَرَ",  mudari:"يُبَعْثِرُ",  masdar:"بَعْثَرَة",  ismFail:"مُبَعْثِر",  ismMafool:"مُبَعْثَر", meaningEn:"to scatter/ransack",       verbType:"salim", isTransitive:true,  isQuranic:true,  quranicReference:"100:9" },
+  { id:"fiq_4",  root:"د-م-د-م", form:11, madi:"دَمْدَمَ",  mudari:"يُدَمْدِمُ",  masdar:"دَمْدَمَة",                                              meaningEn:"to crush/destroy utterly", verbType:"salim", isTransitive:true,  isQuranic:true,  quranicReference:"91:14" },
+  { id:"fiq_5",  root:"ز-خ-ر-ف", form:11, madi:"زَخْرَفَ",  mudari:"يُزَخْرِفُ",  masdar:"زَخْرَفَة",  ismFail:"مُزَخْرِف",  ismMafool:"مُزَخْرَف", meaningEn:"to adorn/decorate",        verbType:"salim", isTransitive:true,  isQuranic:true,  quranicReference:"6:112" },
+  { id:"fiq_6",  root:"ه-ي-م-ن", form:11, madi:"هَيْمَنَ",  mudari:"يُهَيْمِنُ",  masdar:"هَيْمَنَة",  ismFail:"مُهَيْمِن",                         meaningEn:"to watch over/oversee",    verbType:"salim", isTransitive:true,  isQuranic:true,  quranicReference:"5:48" },
+  { id:"fiq_7",  root:"س-ل-س-ل", form:11, madi:"سَلْسَلَ",  mudari:"يُسَلْسِلُ",  masdar:"سَلْسَلَة",  ismFail:"مُسَلْسِل",  ismMafool:"مُسَلْسَل", meaningEn:"to chain up",              verbType:"salim", isTransitive:true,  isQuranic:false },
+  { id:"fiq_8",  root:"ك-ب-ك-ب", form:11, madi:"كَبْكَبَ",  mudari:"يُكَبْكِبُ",  masdar:"كَبْكَبَة",  ismFail:"مُكَبْكِب",  ismMafool:"مُكَبْكَب", meaningEn:"to tumble/throw headlong", verbType:"salim", isTransitive:true,  isQuranic:true,  quranicReference:"26:94" },
+  { id:"fiq_9",  root:"ب-س-م-ل", form:11, madi:"بَسْمَلَ",  mudari:"يُبَسْمِلُ",  masdar:"بَسْمَلَة",                                              meaningEn:"to say bismillah",         verbType:"salim", isTransitive:false, isQuranic:false },
+  { id:"fiq_10", root:"ح-و-ق-ل", form:11, madi:"حَوْقَلَ",  mudari:"يُحَوْقِلُ",  masdar:"حَوْقَلَة",                                              meaningEn:"to say lā ḥawla",          verbType:"salim", isTransitive:false, isQuranic:false },
+  { id:"fiq_11", root:"ع-ر-ق-ل", form:11, madi:"عَرْقَلَ",  mudari:"يُعَرْقِلُ",  masdar:"عَرْقَلَة",  ismFail:"مُعَرْقِل",  ismMafool:"مُعَرْقَل", meaningEn:"to obstruct/hinder",       verbType:"salim", isTransitive:true,  isQuranic:false },
+  { id:"fiq_12", root:"ص-عْل-ك", form:11, madi:"صَعْلَكَ",  mudari:"يُصَعْلِكُ",  masdar:"صَعْلَكَة",                                              meaningEn:"to be poor/destitute",     verbType:"salim", isTransitive:false, isQuranic:false },
+  // ─── Form IIQ (تَفَعْلَلَ) — Reflexive Quadriliterals ───
+  { id:"fiiq_t", root:"د-ح-ر-ج", form:12, madi:"تَدَحْرَجَ", mudari:"يَتَدَحْرَجُ", masdar:"تَدَحْرُج", ismFail:"مُتَدَحْرِج",                      meaningEn:"to roll (reflexive)",      verbType:"salim", isTransitive:false, isQuranic:false },
+  { id:"fiiq_1", root:"ز-ل-ز-ل", form:12, madi:"تَزَلْزَلَ", mudari:"يَتَزَلْزَلُ", masdar:"تَزَلْزُل", ismFail:"مُتَزَلْزِل",                      meaningEn:"to be shaken",             verbType:"salim", isTransitive:false, isQuranic:true },
+  { id:"fiiq_2", root:"ب-ع-ث-ر", form:12, madi:"تَبَعْثَرَ", mudari:"يَتَبَعْثَرُ", masdar:"تَبَعْثُر", ismFail:"مُتَبَعْثِر",                      meaningEn:"to be scattered",          verbType:"salim", isTransitive:false, isQuranic:true },
+  { id:"fiiq_3", root:"ز-خ-ر-ف", form:12, madi:"تَزَخْرَفَ", mudari:"يَتَزَخْرَفُ", masdar:"تَزَخْرُف", ismFail:"مُتَزَخْرِف",                      meaningEn:"to become adorned",        verbType:"salim", isTransitive:false, isQuranic:false },
+  { id:"fiiq_4", root:"ع-ر-ق-ل", form:12, madi:"تَعَرْقَلَ", mudari:"يَتَعَرْقَلُ", masdar:"تَعَرْقُل", ismFail:"مُتَعَرْقِل",                      meaningEn:"to become obstructed",     verbType:"salim", isTransitive:false, isQuranic:false },
 ];
 
 export function getVerbById(id: string): Verb | undefined {
@@ -264,7 +284,9 @@ export const FORM_LABELS: Record<number, { ar: string; pattern: string; meaning:
   7:  { ar: "اِنْفَعَلَ", pattern: "infaʿala",  meaning: "Passive / reflexive" },
   8:  { ar: "اِفْتَعَلَ", pattern: "iftaʿala",  meaning: "Reflexive / middle" },
   9:  { ar: "اِفْعَلَّ",  pattern: "ifʿalla",   meaning: "Colors / defects" },
-  10: { ar: "اِسْتَفْعَلَ", pattern: "istafʿala", meaning: "Seeking / requesting" },
+  10: { ar: "اِسْتَفْعَلَ", pattern: "istafʿala",  meaning: "Seeking / requesting" },
+  11: { ar: "فَعْلَلَ",    pattern: "faʿlala",    meaning: "Quadriliteral base" },
+  12: { ar: "تَفَعْلَلَ",  pattern: "tafaʿlala",  meaning: "Reflexive of IQ" },
 };
 
 // ─── Template Verb Records ───────────────────────────────────────────────────
@@ -279,6 +301,8 @@ export const FORM_TEMPLATE_VERBS: Record<number, Verb> = {
   7:  STARTER_VERBS.find(v => v.id === "f7t")!,
   8:  STARTER_VERBS.find(v => v.id === "f8t")!,
   10: STARTER_VERBS.find(v => v.id === "f10t")!,
+  11: STARTER_VERBS.find(v => v.id === "fiq_t")!,
+  12: STARTER_VERBS.find(v => v.id === "fiiq_t")!,
 };
 
 // ─── Pre-computed Template Conjugations ──────────────────────────────────────
@@ -438,8 +462,27 @@ const FORM10 = buildConjugations("f10t",
   ["اِسْتَغْفِرْ","اِسْتَغْفِرَا","اِسْتَغْفِرُوا","اِسْتَغْفِرِي","اِسْتَغْفِرَا","اِسْتَغْفِرْنَ"]
 );
 
+// Form IQ (فَعْلَلَ) — template: دَحْرَجَ
+const FORM_IQ = buildConjugations("fiq_t",
+  { active:  ["دَحْرَجَ","دَحْرَجَا","دَحْرَجُوا","دَحْرَجَتْ","دَحْرَجَتَا","دَحْرَجْنَ","دَحْرَجْتَ","دَحْرَجْتُمَا","دَحْرَجْتُمْ","دَحْرَجْتِ","دَحْرَجْتُمَا","دَحْرَجْتُنَّ","دَحْرَجْتُ","دَحْرَجْنَا"],
+    passive: ["دُحْرِجَ","دُحْرِجَا","دُحْرِجُوا","دُحْرِجَتْ","دُحْرِجَتَا","دُحْرِجْنَ","دُحْرِجْتَ","دُحْرِجْتُمَا","دُحْرِجْتُمْ","دُحْرِجْتِ","دُحْرِجْتُمَا","دُحْرِجْتُنَّ","دُحْرِجْتُ","دُحْرِجْنَا"] },
+  { active:  ["يُدَحْرِجُ","يُدَحْرِجَانِ","يُدَحْرِجُونَ","تُدَحْرِجُ","تُدَحْرِجَانِ","يُدَحْرِجْنَ","تُدَحْرِجُ","تُدَحْرِجَانِ","تُدَحْرِجُونَ","تُدَحْرِجِينَ","تُدَحْرِجَانِ","تُدَحْرِجْنَ","أُدَحْرِجُ","نُدَحْرِجُ"],
+    passive: ["يُدَحْرَجُ","يُدَحْرَجَانِ","يُدَحْرَجُونَ","تُدَحْرَجُ","تُدَحْرَجَانِ","يُدَحْرَجْنَ","تُدَحْرَجُ","تُدَحْرَجَانِ","تُدَحْرَجُونَ","تُدَحْرَجِينَ","تُدَحْرَجَانِ","تُدَحْرَجْنَ","أُدَحْرَجُ","نُدَحْرَجُ"] },
+  ["دَحْرِجْ","دَحْرِجَا","دَحْرِجُوا","دَحْرِجِي","دَحْرِجَا","دَحْرِجْنَ"],
+);
+
+// Form IIQ (تَفَعْلَلَ) — template: تَدَحْرَجَ
+const FORM_IIQ = buildConjugations("fiiq_t",
+  { active:  ["تَدَحْرَجَ","تَدَحْرَجَا","تَدَحْرَجُوا","تَدَحْرَجَتْ","تَدَحْرَجَتَا","تَدَحْرَجْنَ","تَدَحْرَجْتَ","تَدَحْرَجْتُمَا","تَدَحْرَجْتُمْ","تَدَحْرَجْتِ","تَدَحْرَجْتُمَا","تَدَحْرَجْتُنَّ","تَدَحْرَجْتُ","تَدَحْرَجْنَا"],
+    passive: ["تُدُحْرِجَ","تُدُحْرِجَا","تُدُحْرِجُوا","تُدُحْرِجَتْ","تُدُحْرِجَتَا","تُدُحْرِجْنَ","تُدُحْرِجْتَ","تُدُحْرِجْتُمَا","تُدُحْرِجْتُمْ","تُدُحْرِجْتِ","تُدُحْرِجْتُمَا","تُدُحْرِجْتُنَّ","تُدُحْرِجْتُ","تُدُحْرِجْنَا"] },
+  { active:  ["يَتَدَحْرَجُ","يَتَدَحْرَجَانِ","يَتَدَحْرَجُونَ","تَتَدَحْرَجُ","تَتَدَحْرَجَانِ","يَتَدَحْرَجْنَ","تَتَدَحْرَجُ","تَتَدَحْرَجَانِ","تَتَدَحْرَجُونَ","تَتَدَحْرَجِينَ","تَتَدَحْرَجَانِ","تَتَدَحْرَجْنَ","أَتَدَحْرَجُ","نَتَدَحْرَجُ"],
+    passive: ["يُتَدَحْرَجُ","يُتَدَحْرَجَانِ","يُتَدَحْرَجُونَ","تُتَدَحْرَجُ","تُتَدَحْرَجَانِ","يُتَدَحْرَجْنَ","تُتَدَحْرَجُ","تُتَدَحْرَجَانِ","تُتَدَحْرَجُونَ","تُتَدَحْرَجِينَ","تُتَدَحْرَجَانِ","تُتَدَحْرَجْنَ","أُتَدَحْرَجُ","نُتَدَحْرَجُ"] },
+  ["تَدَحْرَجْ","تَدَحْرَجَا","تَدَحْرَجُوا","تَدَحْرَجِي","تَدَحْرَجَا","تَدَحْرَجْنَ"],
+);
+
 export const ALL_FORM_CONJUGATIONS: Conjugation[] = [
   ...FORM2, ...FORM3, ...FORM4, ...FORM5, ...FORM6, ...FORM7, ...FORM8, ...FORM10,
+  ...FORM_IQ, ...FORM_IIQ,
 ];
 
 // ─── Conjugation Engine ──────────────────────────────────────────────────────
@@ -526,7 +569,8 @@ export function generateConjugationsForVerb(verb: Verb, tense: Tense, voice: Voi
   const templates = conjugations.filter(c => c.tense === tense && c.voice === voice);
   if (verb.id === templateVerb.id) return templates;
   const targetRoot = extractRootLetters(verb);
-  if (targetRoot.length !== 3) return [];
+  const templateRoot = extractRootLetters(templateVerb);
+  if (targetRoot.length !== templateRoot.length) return [];
   return templates.map(template => {
     const segments = decomposeForm(template.formText, templateVerb);
     let rootLetterIndex = 0;

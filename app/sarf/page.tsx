@@ -8,8 +8,8 @@ import {
 } from "@/data/sarf";
 import type { Verb, Tense, Voice } from "@/data/sarf";
 
-const AVAILABLE_FORMS = [1, 2, 3, 4, 5, 6, 7, 8, 10];
-const FORM_NUMS = ["","I","II","III","IV","V","VI","VII","VIII","IX","X"];
+const AVAILABLE_FORMS = [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12];
+const FORM_NUMS = ["","I","II","III","IV","V","VI","VII","VIII","IX","X","IQ","IIQ"];
 const TENSE_LABELS: Record<Tense, { ar: string; en: string }> = {
   madi:   { ar: "الماضي",   en: "Past" },
   mudari: { ar: "المضارع",  en: "Present" },
@@ -39,7 +39,7 @@ function Hub({ onVerbs, onScaleDrill }: { onVerbs: (form?: number) => void; onSc
             الصَّرْف
           </div>
           <p className="text-stone-400 text-sm leading-relaxed max-w-sm mx-auto">
-            Arabic morphology — conjugate verbs across all 10 forms, 14 pronoun slots,
+            Arabic morphology — 10 trilateral forms + quadriliteral (IQ/IIQ), 14 pronoun slots,
             3 tenses, active and passive voice.
           </p>
         </div>
