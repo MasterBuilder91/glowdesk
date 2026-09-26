@@ -213,6 +213,12 @@ function Hub({
             <div className="gdsk-game-desc">All 28 Arabic letters with name, transliteration, positional forms, and connection notes.</div>
             <div className="gdsk-game-tag" style={{ color: "#4A1A6E" }}>Reference</div>
           </div>
+          <Link href="/sarf" className="gdsk-game-card" style={{ textDecoration: "none", color: "inherit" }}>
+            <div className="gdsk-game-icon" style={{ fontFamily: "serif" }}>الصَّرْف</div>
+            <div className="gdsk-game-title">Sarf Trainer</div>
+            <div className="gdsk-game-desc">Conjugate 155+ verbs across all 10 forms, 14 pronoun slots, past/present/imperative, active/passive.</div>
+            <div className="gdsk-game-tag" style={{ color: "#1A6B4A" }}>Morphology drill</div>
+          </Link>
         </div>
       </section>
 
