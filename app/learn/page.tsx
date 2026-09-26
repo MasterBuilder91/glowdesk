@@ -6,6 +6,11 @@ import { SKILLS, getComprehensionPercent } from "@/data/curriculum";
 import type { Skill } from "@/data/curriculum";
 import { generateSession, getSkillColor } from "@/data/drills";
 import type { DrillQuestion } from "@/data/drills";
+import {
+  ALPHABET, HARAKAT, KB_ROWS, GAME_WORDS,
+  bareWithMarks, spellWord, lookupWord,
+} from "@/data/dictionary";
+import type { BuiltLetter, DictEntry } from "@/data/dictionary";
 
 // ── Audio ────────────────────────────────────────────────────────────────────
 
@@ -127,12 +132,18 @@ function Hub({
   onStudy,
   onDrill,
   onQuickDrill,
+  onBlaster,
+  onBuilder,
+  onAlphabet,
   streak,
   totalDrilled,
 }: {
   onStudy: (s: Skill) => void;
   onDrill: (s: Skill) => void;
   onQuickDrill: () => void;
+  onBlaster: () => void;
+  onBuilder: () => void;
+  onAlphabet: () => void;
   streak: number;
   totalDrilled: number;
 }) {
@@ -175,6 +186,35 @@ function Hub({
       <LevelSection title="Beginner"     skills={BEGINNER}     color="#1A7A3E" onStudy={onStudy} onDrill={onDrill} />
       <LevelSection title="Intermediate" skills={INTERMEDIATE} color="#C4952A" onStudy={onStudy} onDrill={onDrill} />
       <LevelSection title="Advanced"     skills={ADVANCED}     color="#1A6B4A" onStudy={onStudy} onDrill={onDrill} />
+
+      <section style={{ marginBottom: 48 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#1A6B4A" }}>
+            Games &amp; Tools
+          </span>
+          <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+        </div>
+        <div className="gdsk-game-cards">
+          <div className="gdsk-game-card" onClick={onBlaster}>
+            <div className="gdsk-game-icon">☄️</div>
+            <div className="gdsk-game-title">Letter Blaster</div>
+            <div className="gdsk-game-desc">Click floating letters in the right order to spell the word. 350+ words.</div>
+            <div className="gdsk-game-tag" style={{ color: "#C4952A" }}>Spelling game</div>
+          </div>
+          <div className="gdsk-game-card" onClick={onBuilder}>
+            <div className="gdsk-game-icon">⌨️</div>
+            <div className="gdsk-game-title">Word Builder</div>
+            <div className="gdsk-game-desc">Type on a real Arabic keyboard, add vowel marks, and get live dictionary feedback.</div>
+            <div className="gdsk-game-tag" style={{ color: "#1A6B4A" }}>Interactive tool</div>
+          </div>
+          <div className="gdsk-game-card" onClick={onAlphabet}>
+            <div className="gdsk-game-icon">ا</div>
+            <div className="gdsk-game-title">Alphabet Chart</div>
+            <div className="gdsk-game-desc">All 28 Arabic letters with name, transliteration, positional forms, and connection notes.</div>
+            <div className="gdsk-game-tag" style={{ color: "#4A1A6E" }}>Reference</div>
+          </div>
+        </div>
+      </section>
 
       <div className="gdsk-live-cta">
         <div>
@@ -475,6 +515,297 @@ function DrillSession({
   );
 }
 
+// ── Letter Blaster ────────────────────────────────────────────────────────────
+
+interface Asteroid {
+  id: string;
+  letter: string;
+  x: number;
+  y: number;
+  delay: number;
+  state: "floating" | "hit" | "wrong";
+}
+
+function genPositions(count: number): { x: number; y: number }[] {
+  const pts: { x: number; y: number }[] = [];
+  let tries = 0;
+  while (pts.length < count && tries < 500) {
+    tries++;
+    const x = 6 + Math.random() * 82;
+    const y = 8 + Math.random() * 72;
+    const ok = pts.every((p) => Math.hypot(p.x - x, p.y - y) > 14);
+    if (ok) pts.push({ x, y });
+  }
+  while (pts.length < count) pts.push({ x: 10 + Math.random() * 70, y: 10 + Math.random() * 70 });
+  return pts;
+}
+
+function LetterBlaster({ onBack }: { onBack: () => void }) {
+  const [word, setWord] = useState<DictEntry | null>(null);
+  const [targetLetters, setTargetLetters] = useState<string[]>([]);
+  const [asteroids, setAsteroids] = useState<Asteroid[]>([]);
+  const [nextIdx, setNextIdx] = useState(0);
+  const [score, setScore] = useState(0);
+  const [words, setWords] = useState(0);
+  const [win, setWin] = useState(false);
+
+  const startRound = useCallback(() => {
+    const w = GAME_WORDS[Math.floor(Math.random() * GAME_WORDS.length)];
+    const clean = w.ar.replace(/[ً-ْٰ]/g, "");
+    const tl = bareWithMarks(clean).map((b) => b.letter);
+    const allAlpha = ALPHABET.map((l) => l.ar);
+    const decoys: string[] = [];
+    while (decoys.length < Math.max(4, 8 - tl.length)) {
+      const r = allAlpha[Math.floor(Math.random() * allAlpha.length)];
+      if (!decoys.includes(r)) decoys.push(r);
+    }
+    const combined = [...tl, ...decoys];
+    const positions = genPositions(combined.length);
+    const asts: Asteroid[] = combined
+      .map((letter, i) => ({
+        id: `${letter}-${i}-${Date.now()}`,
+        letter,
+        x: positions[i].x,
+        y: positions[i].y,
+        delay: Math.random() * 2,
+        state: "floating" as const,
+      }))
+      .sort(() => Math.random() - 0.5);
+    setWord(w);
+    setTargetLetters(tl);
+    setAsteroids(asts);
+    setNextIdx(0);
+    setWin(false);
+  }, []);
+
+  useEffect(() => { startRound(); }, [startRound]);
+
+  function blast(id: string) {
+    const ast = asteroids.find((a) => a.id === id);
+    if (!ast || ast.state !== "floating") return;
+    if (ast.letter === targetLetters[nextIdx]) {
+      setAsteroids((prev) => prev.map((a) => a.id === id ? { ...a, state: "hit" } : a));
+      const ni = nextIdx + 1;
+      setNextIdx(ni);
+      setScore((s) => s + 10);
+      if (ni >= targetLetters.length) {
+        setWin(true);
+        setWords((w) => w + 1);
+        setScore((s) => s + 20);
+        setTimeout(startRound, 1800);
+      }
+    } else {
+      setAsteroids((prev) => prev.map((a) => a.id === id ? { ...a, state: "wrong" } : a));
+      setScore((s) => Math.max(0, s - 5));
+      setTimeout(() => setAsteroids((prev) => prev.map((a) => a.id === id ? { ...a, state: "floating" } : a)), 400);
+    }
+  }
+
+  const progress = targetLetters.map((l, i) => i < nextIdx ? l : "_").join(" ");
+
+  return (
+    <div className="gdsk-blaster-wrap">
+      <div className="gdsk-blaster-header">
+        <button onClick={onBack} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.6)", fontSize: 13, cursor: "pointer" }}>← exit</button>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginBottom: 2 }}>Letter Blaster</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: "#FFD580" }}>{words} words · {score} pts</div>
+        </div>
+        <div style={{ width: 48 }} />
+      </div>
+
+      <div className="gdsk-blaster-clue">
+        <span style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", marginRight: 8, textTransform: "uppercase", letterSpacing: "0.12em" }}>Spell:</span>
+        <span style={{ fontSize: 20, fontWeight: 700, color: "#fff" }}>{word?.en ?? "—"}</span>
+      </div>
+
+      <div className="gdsk-blaster-progress font-arabic" style={{ direction: "rtl" }}>
+        {targetLetters.map((l, i) => (
+          <span key={i} style={{ opacity: i < nextIdx ? 1 : 0.25, transition: "opacity 0.3s", margin: "0 4px", color: "#FFD580", fontSize: 32 }}>
+            {l}
+          </span>
+        ))}
+      </div>
+
+      <div className="gdsk-blaster-field">
+        {asteroids.map((a) => (
+          <button
+            key={a.id}
+            className={`gdsk-asteroid gdsk-ast-${a.state}`}
+            style={{
+              left: `${a.x}%`,
+              top: `${a.y}%`,
+              animationDelay: `${a.delay}s`,
+              visibility: a.state === "hit" ? "hidden" : "visible",
+            }}
+            onClick={() => blast(a.id)}
+          >
+            <span className="font-arabic">{a.letter}</span>
+          </button>
+        ))}
+        {win && (
+          <div className="gdsk-blast-win">
+            <div className="font-arabic" style={{ fontSize: 48, color: "#FFD580", direction: "rtl" }}>{word?.ar}</div>
+            <div style={{ fontSize: 16, color: "#fff", marginTop: 8 }}>{word?.en}</div>
+            <div style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>+20 pts — next round…</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Word Builder ──────────────────────────────────────────────────────────────
+
+interface WBLetter {
+  ar: string;
+  harakah: string | null;
+  id: number;
+}
+
+let wbId = 0;
+
+function WordBuilder({ onBack }: { onBack: () => void }) {
+  const [letters, setLetters] = useState<WBLetter[]>([]);
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+
+  const wordStr = letters.map((l) => l.ar + (l.harakah ?? "")).join("");
+
+  const builtForSpell: BuiltLetter[] = letters.map((l) => {
+    const alpha = ALPHABET.find((a) => a.ar === l.ar) ?? { ar: l.ar, translit: l.ar, name: l.ar, forms: "" };
+    return { ...alpha, harakah: l.harakah ? (HARAKAT.find((h) => h.mark === l.harakah) ?? null) : null };
+  });
+  const translit = letters.length ? spellWord(builtForSpell) : "";
+  const { exact, bare } = letters.length ? lookupWord(wordStr) : { exact: null, bare: [] };
+
+  function addLetter(ar: string) {
+    const newLetter: WBLetter = { ar, harakah: null, id: wbId++ };
+    setLetters((prev) => [...prev, newLetter]);
+    setSelectedIdx(letters.length);
+  }
+
+  function applyHarakah(mark: string) {
+    if (selectedIdx === null) return;
+    setLetters((prev) => prev.map((l, i) => i === selectedIdx ? { ...l, harakah: l.harakah === mark ? null : mark } : l));
+  }
+
+  function eraseLast() {
+    if (!letters.length) return;
+    setLetters((prev) => prev.slice(0, -1));
+    setSelectedIdx((prev) => (prev !== null && prev > 0 ? prev - 1 : null));
+  }
+
+  function clearAll() {
+    setLetters([]);
+    setSelectedIdx(null);
+  }
+
+  return (
+    <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 5vw 80px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 0 28px" }}>
+        <button onClick={onBack} style={{ background: "none", border: "none", fontSize: 14, color: "var(--ink-2)", cursor: "pointer" }}>← Back</button>
+        <span style={{ color: "var(--border)" }}>|</span>
+        <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent)" }}>Word Builder</span>
+      </div>
+
+      {/* Display */}
+      <div className="gdsk-wb-display" onClick={() => setSelectedIdx(null)}>
+        {letters.length === 0 ? (
+          <span style={{ color: "var(--ink-3)", fontSize: 18, fontStyle: "italic" }}>Start typing below…</span>
+        ) : (
+          <>
+            <div className="font-arabic gdsk-wb-word" style={{ direction: "rtl" }}>
+              {letters.map((l, i) => (
+                <span key={l.id} className={`gdsk-wb-letter ${selectedIdx === i ? "gdsk-wb-selected" : ""}`}
+                      onClick={(e) => { e.stopPropagation(); setSelectedIdx(i); }}>
+                  {l.ar}{l.harakah ?? ""}
+                </span>
+              ))}
+            </div>
+            {translit && <div className="gdsk-wb-translit">{translit}</div>}
+            {exact && <div className="gdsk-wb-match gdsk-wb-exact">✅ <em>{exact.translit}</em> — {exact.en}</div>}
+            {!exact && bare.length > 0 && <div className="gdsk-wb-match gdsk-wb-maybe">🟡 could be: {bare.slice(0,2).map(b => b.en).join(", ")}</div>}
+          </>
+        )}
+      </div>
+
+      {/* Harakah */}
+      <div className="gdsk-wb-harakat">
+        {HARAKAT.map((h) => (
+          <button key={h.mark} className="gdsk-wb-hk"
+                  title={h.sound}
+                  style={{ background: letters[selectedIdx ?? -1]?.harakah === h.mark ? "var(--accent)" : undefined,
+                           color: letters[selectedIdx ?? -1]?.harakah === h.mark ? "#fff" : undefined }}
+                  onClick={() => applyHarakah(h.mark)}>
+            <span className="font-arabic">{"ب" + h.mark}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Keyboard */}
+      <div className="gdsk-kb">
+        {KB_ROWS.map((row, ri) => (
+          <div key={ri} className="gdsk-kb-row">
+            {row.map((ar) => (
+              <button key={ar} className="gdsk-kb-key font-arabic" onClick={() => addLetter(ar)}>{ar}</button>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {/* Controls */}
+      <div style={{ display: "flex", gap: 12, marginTop: 16, justifyContent: "center" }}>
+        <button className="gdsk-wb-ctrl" onClick={eraseLast} disabled={!letters.length}>⌫ Erase</button>
+        <button className="gdsk-wb-ctrl" onClick={clearAll} disabled={!letters.length}>Clear all</button>
+        {wordStr && <button className="gdsk-wb-ctrl" onClick={() => speak(wordStr)}>♪ Hear it</button>}
+      </div>
+
+      {/* Demo words */}
+      <div style={{ marginTop: 28, borderTop: "1px solid var(--border)", paddingTop: 20 }}>
+        <p style={{ fontSize: 12, color: "var(--ink-3)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.1em" }}>Try these</p>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {[{ar:"بيت",en:"house"},{ar:"قلم",en:"pen"},{ar:"كتاب",en:"book"},{ar:"درس",en:"lesson"},{ar:"نور",en:"light"}].map(({ ar, en }) => (
+            <button key={ar} className="gdsk-wb-demo font-arabic" onClick={() => {
+              const bare2 = bareWithMarks(ar.replace(/[ً-ْٰ]/g, ""));
+              setLetters(bare2.map((b) => ({ ar: b.letter, harakah: null, id: wbId++ })));
+              setSelectedIdx(null);
+            }}>
+              {ar} <span style={{ fontFamily: "inherit", fontSize: 11, color: "var(--ink-3)" }}>{en}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Alphabet Reference ────────────────────────────────────────────────────────
+
+function AlphabetRef({ onBack }: { onBack: () => void }) {
+  return (
+    <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 5vw 80px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 0 28px" }}>
+        <button onClick={onBack} style={{ background: "none", border: "none", fontSize: 14, color: "var(--ink-2)", cursor: "pointer" }}>← Back</button>
+        <span style={{ color: "var(--border)" }}>|</span>
+        <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent)" }}>
+          Arabic Alphabet — 28 Letters
+        </span>
+      </div>
+      <div className="gdsk-alpha-grid">
+        {ALPHABET.map((l, i) => (
+          <div key={i} className="gdsk-alpha-card">
+            <div className="font-arabic gdsk-alpha-letter">{l.ar}</div>
+            <div className="gdsk-alpha-name">{l.name}</div>
+            <div className="gdsk-alpha-translit">{l.translit}</div>
+            <div className="gdsk-alpha-forms font-arabic" style={{ direction: "rtl" }}>{l.forms}</div>
+            {l.nc && <div className="gdsk-alpha-nc">non-connecting</div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const STYLES = `
@@ -602,11 +933,86 @@ const STYLES = `
   .gdsk-score-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
   .gdsk-btn-again { padding: 13px 28px; border: 1px solid var(--border); background: none; border-radius: 9px; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; transition: background 0.12s; }
   .gdsk-btn-again:hover { background: var(--bg); }
+
+  /* Letter Blaster */
+  @keyframes gdsk-drift {
+    0%,100% { transform: translate(0,0) rotate(0deg); }
+    20%     { transform: translate(-10px,-14px) rotate(4deg); }
+    45%     { transform: translate(12px,-8px) rotate(-3deg); }
+    70%     { transform: translate(-6px,12px) rotate(2deg); }
+  }
+  @keyframes gdsk-boom {
+    0%   { transform: scale(1);   opacity: 1; background: rgba(255,210,50,0.6); }
+    35%  { transform: scale(2.4); opacity: 0.7; }
+    100% { transform: scale(0);   opacity: 0; }
+  }
+
+  .gdsk-blaster-wrap { min-height: calc(100vh - 56px); display: flex; flex-direction: column; align-items: stretch; background: radial-gradient(ellipse at 50% 30%, #0a1a2e 0%, #050c16 100%); color: #fff; }
+  .gdsk-blaster-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 5vw; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .gdsk-blaster-clue { text-align: center; padding: 16px 5vw 4px; }
+  .gdsk-blaster-progress { display: flex; justify-content: center; padding: 8px 5vw 12px; min-height: 52px; letter-spacing: 0.08em; }
+  .gdsk-blaster-field { flex: 1; position: relative; min-height: 340px; overflow: hidden; margin: 0 5vw; border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; background: rgba(255,255,255,0.02); }
+
+  .gdsk-asteroid { position: absolute; width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; animation: gdsk-drift 3.4s ease-in-out infinite; transition: background 0.1s; transform: translate(-50%,-50%); }
+  .gdsk-asteroid:hover { background: rgba(255,255,255,0.16); border-color: rgba(255,210,50,0.6); }
+  .gdsk-asteroid .font-arabic { font-size: 24px; color: #fff; pointer-events: none; }
+  .gdsk-ast-hit  { animation: gdsk-boom 0.4s ease forwards !important; }
+  .gdsk-ast-wrong { animation: gdsk-shake 0.4s ease !important; border-color: #C0392B !important; background: rgba(192,57,43,0.25) !important; }
+
+  .gdsk-blast-win { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); animation: gdsk-pop 0.3s ease; border-radius: 16px; }
+
+  /* Word Builder */
+  .gdsk-wb-display { min-height: 120px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 20px; gap: 8px; }
+  .gdsk-wb-word { font-size: clamp(36px,6vw,60px); line-height: 1.6; letter-spacing: 0.02em; color: var(--ink); cursor: default; }
+  .gdsk-wb-letter { padding: 0 3px; border-radius: 4px; cursor: pointer; transition: background 0.12s; }
+  .gdsk-wb-letter:hover { background: rgba(26,107,74,0.1); }
+  .gdsk-wb-selected { background: rgba(196,149,42,0.18) !important; outline: 2px solid #C4952A; border-radius: 4px; }
+  .gdsk-wb-translit { font-size: 15px; color: var(--ink-3); letter-spacing: 0.05em; font-style: italic; }
+  .gdsk-wb-match { font-size: 14px; padding: 6px 16px; border-radius: 8px; }
+  .gdsk-wb-exact { background: rgba(26,122,62,0.08); color: var(--accent); }
+  .gdsk-wb-maybe { background: rgba(196,149,42,0.08); color: #7B4F12; }
+
+  .gdsk-wb-harakat { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 14px; }
+  .gdsk-wb-hk { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 18px; line-height: 1; transition: background 0.12s, color 0.12s; }
+  .gdsk-wb-hk:hover { border-color: var(--accent); }
+
+  .gdsk-kb { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .gdsk-kb-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .gdsk-kb-key { width: 44px; height: 44px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.1s, transform 0.08s; color: var(--ink); }
+  .gdsk-kb-key:hover { background: var(--bg); transform: translateY(-1px); }
+  .gdsk-kb-key:active { transform: translateY(0); background: rgba(26,107,74,0.12); }
+  @media (max-width: 480px) { .gdsk-kb-key { width: 36px; height: 36px; font-size: 18px; } }
+
+  .gdsk-wb-ctrl { padding: 9px 20px; background: none; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--ink-2); cursor: pointer; transition: background 0.12s; }
+  .gdsk-wb-ctrl:hover:not(:disabled) { background: var(--bg); }
+  .gdsk-wb-ctrl:disabled { opacity: 0.35; cursor: default; }
+  .gdsk-wb-demo { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; font-size: 22px; cursor: pointer; color: var(--ink); transition: border-color 0.12s; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .gdsk-wb-demo:hover { border-color: var(--accent); }
+
+  /* Alphabet */
+  .gdsk-alpha-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .gdsk-alpha-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 12px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: box-shadow 0.15s; }
+  .gdsk-alpha-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+  .gdsk-alpha-letter { font-size: 40px; color: var(--accent); line-height: 1.4; }
+  .gdsk-alpha-name { font-size: 13px; font-weight: 700; color: var(--ink); }
+  .gdsk-alpha-translit { font-size: 11px; color: var(--ink-3); }
+  .gdsk-alpha-forms { font-size: 13px; color: var(--ink-2); letter-spacing: 0.05em; }
+  .gdsk-alpha-nc { font-size: 9px; color: #C4952A; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; background: rgba(196,149,42,0.1); padding: 2px 6px; border-radius: 4px; }
+
+  /* Games hub section */
+  .gdsk-game-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+  @media (max-width: 700px) { .gdsk-game-cards { grid-template-columns: 1fr; } }
+  .gdsk-game-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 22px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; transition: box-shadow 0.18s, transform 0.18s; }
+  .gdsk-game-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.09); transform: translateY(-2px); }
+  .gdsk-game-icon { font-size: 32px; margin-bottom: 6px; }
+  .gdsk-game-title { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .gdsk-game-desc { font-size: 13px; color: var(--ink-3); line-height: 1.5; }
+  .gdsk-game-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; margin-top: 8px; }
 `;
 
 // ── Root ──────────────────────────────────────────────────────────────────────
 
-type Mode = "hub" | "lesson" | "drill";
+type Mode = "hub" | "lesson" | "drill" | "blaster" | "builder" | "alphabet";
 
 export default function LearnPage() {
   const [mode, setMode] = useState<Mode>("hub");
@@ -679,6 +1085,9 @@ export default function LearnPage() {
           onStudy={handleStudy}
           onDrill={startDrill}
           onQuickDrill={startQuickDrill}
+          onBlaster={() => setMode("blaster")}
+          onBuilder={() => setMode("builder")}
+          onAlphabet={() => setMode("alphabet")}
           streak={streak}
           totalDrilled={totalDrilled}
         />
@@ -699,6 +1108,10 @@ export default function LearnPage() {
           onBack={() => setMode("hub")}
         />
       )}
+
+      {mode === "blaster" && <LetterBlaster onBack={() => setMode("hub")} />}
+      {mode === "builder" && <WordBuilder onBack={() => setMode("hub")} />}
+      {mode === "alphabet" && <AlphabetRef onBack={() => setMode("hub")} />}
     </>
   );
 }
