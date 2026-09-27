@@ -906,7 +906,7 @@ function AlphabetRef({ onBack }: { onBack: () => void }) {
         {/* RTL demo */}
         <div style={{ textAlign: "center", padding: "24px 0 20px" }}>
           <div style={{ fontSize: 36, fontFamily: "var(--font-arabic)", color: "var(--accent)", direction: "rtl", letterSpacing: 6 }}>
-            ي ← و ← ه ← ن ← م ← ل ← ك ← ق ← ف ← غ ← ع ← ظ ← ط ← ض ← ص ← ش ← س ← ز ← ر ← ذ ← د ← خ ← ح ← ج ← ث ← ت ← ب ← ا
+            ا ← ب ← ت ← ث ← ج ← ح ← خ ← د ← ذ ← ر ← ز ← س ← ش ← ص ← ض ← ط ← ظ ← ع ← غ ← ف ← ق ← ك ← ل ← م ← ن ← ه ← و ← ي
           </div>
           <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 10, letterSpacing: "0.08em" }}>
             ← Arabic flows this direction — right to left
