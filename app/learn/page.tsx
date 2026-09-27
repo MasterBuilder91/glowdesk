@@ -794,28 +794,269 @@ function WordBuilder({ onBack }: { onBack: () => void }) {
   );
 }
 
-// ── Alphabet Reference ────────────────────────────────────────────────────────
+// ── Alphabet Lesson ───────────────────────────────────────────────────────────
+
+const LETTER_DETAIL: Record<string, {
+  sound: string;
+  tip: string;
+  example: string;
+  exampleMeaning: string;
+  group: string;
+  sun: boolean;
+}> = {
+  "ا": { sound: "aa / silent", tip: "Holds a vowel sound (like 'a' in 'father') or stays silent when carrying no vowel. It never stands alone — it always needs a harakah.", example: "اللَّه", exampleMeaning: "God", group: "vowel-carrier", sun: false },
+  "ب": { sound: "b", tip: "Exactly like English 'b' in 'boat'. One dot below.", example: "بَيْت", exampleMeaning: "house", group: "easy", sun: false },
+  "ت": { sound: "t", tip: "Touch the tip of your tongue to your upper teeth — slightly further forward than English 't'. Two dots above.", example: "تَوْبَة", exampleMeaning: "repentance", group: "easy", sun: true },
+  "ث": { sound: "th", tip: "Like 'th' in 'think' — tongue lightly between your teeth. Three dots above.", example: "ثَمَر", exampleMeaning: "fruit", group: "easy", sun: true },
+  "ج": { sound: "j", tip: "Like 'j' in 'jump' (Egyptian Arabic) or 'dge' in 'edge'. One dot inside the letter.", example: "جَنَّة", exampleMeaning: "paradise", group: "easy", sun: false },
+  "ح": { sound: "ḥ (deep H)", tip: "UNIQUE TO ARABIC — exhale sharply from the throat without voicing it, like whispering the deepest possible 'h'. Not the same as ه.", example: "حَمْد", exampleMeaning: "praise", group: "guttural", sun: false },
+  "خ": { sound: "kh", tip: "Like the sound in Scottish 'loch' or German 'Bach' — a raspy friction at the back of the throat. Like ح but with vibration.", example: "خَيْر", exampleMeaning: "goodness", group: "back-of-throat", sun: false },
+  "د": { sound: "d", tip: "Touch the tongue tip to your upper teeth — like English 'd' but slightly more forward. Non-connecting letter.", example: "دِين", exampleMeaning: "religion", group: "easy", sun: true },
+  "ذ": { sound: "dh", tip: "Like 'th' in 'this' or 'the' — voiced version of ث, tongue between teeth with buzzing. Non-connecting.", example: "ذِكْر", exampleMeaning: "remembrance", group: "easy", sun: true },
+  "ر": { sound: "r (rolled)", tip: "A light tongue-tap or slight roll, like Spanish 'r' in 'pero'. Closer to the teeth than English 'r'. Non-connecting.", example: "رَحْمَة", exampleMeaning: "mercy", group: "easy", sun: true },
+  "ز": { sound: "z", tip: "Exactly like English 'z' in 'zero'. Non-connecting.", example: "زَكَاة", exampleMeaning: "charity (Zakah)", group: "easy", sun: true },
+  "س": { sound: "s", tip: "Like English 's' in 'sun' — never 'z'. Distinguish this from its emphatic version ص.", example: "سَلَام", exampleMeaning: "peace", group: "easy", sun: true },
+  "ش": { sound: "sh", tip: "Like 'sh' in 'shoe' or 'ship'. Three dots above the basic shape of س.", example: "شَمْس", exampleMeaning: "sun", group: "easy", sun: true },
+  "ص": { sound: "ṣ (emphatic S)", tip: "A darker, heavier 's' — press the back of the tongue down and back. The rest of the mouth widens. All vowels near it become darker.", example: "صَلَاة", exampleMeaning: "prayer (Salah)", group: "emphatic", sun: true },
+  "ض": { sound: "ḍ (emphatic D)", tip: "UNIQUELY ARABIC — Arabic is called 'the language of ḍ'. A heavy 'd' made with the side of the tongue pressed to the upper teeth. Deeper than ظ.", example: "ضَوْء", exampleMeaning: "light", group: "emphatic", sun: true },
+  "ط": { sound: "ṭ (emphatic T)", tip: "A heavy, dark 't' — back of tongue presses down, like saying 't' while holding your jaw wide open. Companion to ت.", example: "طَرِيق", exampleMeaning: "road / path", group: "emphatic", sun: true },
+  "ظ": { sound: "ẓ (emphatic DH)", tip: "Emphatic version of ذ — heavy 'dh' with tongue between teeth and the back of mouth open. Many Arabs today pronounce it like ض.", example: "ظُلْم", exampleMeaning: "injustice", group: "emphatic", sun: true },
+  "ع": { sound: "ʿayn (voiced guttural)", tip: "UNIQUE TO ARABIC — the throat tightens and vibrates. Like ح but voiced. No equivalent in English. This is the 'ayn' in words like Quran (which starts with ق, not ع).", example: "عِلْم", exampleMeaning: "knowledge", group: "guttural", sun: false },
+  "غ": { sound: "gh (gargled R)", tip: "Like the Parisian French 'r' in 'Paris' — a raspy, gargled sound from the very back of the mouth. Voiced version of خ.", example: "غَفُور", exampleMeaning: "All-Forgiving", group: "back-of-throat", sun: false },
+  "ف": { sound: "f", tip: "Exactly like English 'f' in 'faith' — upper teeth on lower lip. One dot above.", example: "فُرْقَان", exampleMeaning: "criterion (Al-Furqan)", group: "easy", sun: false },
+  "ق": { sound: "q (uvular K)", tip: "A 'k' sound made from the very back of the throat, behind the uvula. English 'k' is too far forward. Two dots above.", example: "قُرْآن", exampleMeaning: "The Quran", group: "back-of-throat", sun: false },
+  "ك": { sound: "k", tip: "Like English 'k' in 'king' or 'c' in 'cat'. Lighter than ق.", example: "كَلِمَة", exampleMeaning: "word", group: "easy", sun: false },
+  "ل": { sound: "l", tip: "Like English 'l' but with the tongue tip on the upper teeth. In اللَّه it becomes heavy (dark L).", example: "لَيْل", exampleMeaning: "night", group: "easy", sun: true },
+  "م": { sound: "m", tip: "Exactly like English 'm' in 'moon' — lips pressed together.", example: "مَاء", exampleMeaning: "water", group: "easy", sun: false },
+  "ن": { sound: "n", tip: "Like English 'n' in 'night'. One dot above, like ب has one dot below.", example: "نُور", exampleMeaning: "light", group: "easy", sun: true },
+  "ه": { sound: "h (soft H)", tip: "A soft, airy 'h' like English 'h' in 'house'. Different from ح which is a deep guttural 'h'.", example: "هُدًى", exampleMeaning: "guidance", group: "easy", sun: false },
+  "و": { sound: "w / ūū", tip: "As a consonant: 'w' like 'water'. As a long vowel: 'oo' like 'moon'. Non-connecting. Alef, Waw, and Ya are the three long-vowel letters.", example: "وَحْي", exampleMeaning: "revelation (waḥy)", group: "vowel-carrier", sun: false },
+  "ي": { sound: "y / īī", tip: "As a consonant: 'y' like 'yes'. As a long vowel: 'ee' like 'teen'. Two dots below in isolated/final form. Alef, Waw, and Ya are the three long-vowel letters.", example: "يَوْم", exampleMeaning: "day", group: "vowel-carrier", sun: false },
+  "ى": { sound: "ā (long A)", tip: "The 'alif maqsurah' — appears at the end of words. Looks like ي without dots. Carries the long 'aa' sound. Non-connecting.", example: "مُوسَى", exampleMeaning: "Moses", group: "vowel-carrier", sun: false },
+};
+
+const ALPHA_GROUPS: Record<string, { label: string; color: string; bg: string; desc: string }> = {
+  "easy":          { label: "Familiar", color: "#1A7A3E", bg: "rgba(26,122,62,0.1)", desc: "Close to English sounds" },
+  "vowel-carrier": { label: "Vowel Carrier", color: "#1A4A8A", bg: "rgba(26,74,138,0.1)", desc: "Carry long vowel sounds" },
+  "back-of-throat": { label: "Back of Throat", color: "#8A4A10", bg: "rgba(138,74,16,0.1)", desc: "Produced at back of mouth" },
+  "emphatic":      { label: "Emphatic", color: "#6A1A7A", bg: "rgba(106,26,122,0.1)", desc: "Heavy versions of light sounds" },
+  "guttural":      { label: "Pharyngeal", color: "#8A1A2A", bg: "rgba(138,26,42,0.1)", desc: "Deep in the throat — no English parallel" },
+};
+
+const ALPHA_FILTERS = [
+  { key: "all",            label: "All 28" },
+  { key: "easy",           label: "Familiar" },
+  { key: "emphatic",       label: "Emphatic" },
+  { key: "guttural",       label: "Pharyngeal" },
+  { key: "back-of-throat", label: "Back of Throat" },
+  { key: "vowel-carrier",  label: "Vowel Carriers" },
+  { key: "sun",            label: "Sun Letters" },
+  { key: "moon",           label: "Moon Letters" },
+  { key: "nc",             label: "Non-Connecting" },
+];
 
 function AlphabetRef({ onBack }: { onBack: () => void }) {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [filter, setFilter] = useState("all");
+
+  const letter = selected !== null ? ALPHABET[selected] : null;
+  const detail = letter ? LETTER_DETAIL[letter.ar] : null;
+
+  const filtered = ALPHABET.filter((l) => {
+    if (filter === "all") return true;
+    const d = LETTER_DETAIL[l.ar];
+    if (filter === "sun")  return !!d?.sun;
+    if (filter === "moon") return d ? !d.sun : false;
+    if (filter === "nc")   return !!l.nc;
+    return d?.group === filter;
+  });
+
+  // ── Letter detail view ──────────────────────────────────────────────────────
+  if (letter && detail) {
+    const group = ALPHA_GROUPS[detail.group];
+    const formParts = letter.forms.split(" ");
+    const forms = [
+      { label: "Isolated", sub: "alone",          form: letter.ar },
+      { label: "Initial",  sub: "start of word",  form: formParts[0] || "—" },
+      { label: "Medial",   sub: "middle of word", form: formParts[1] || "—" },
+      { label: "Final",    sub: "end of word",    form: formParts[2] || "—" },
+    ];
+    return (
+      <div style={{ maxWidth: 760, margin: "0 auto", padding: "0 5vw 80px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 0 24px" }}>
+          <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", fontSize: 14, color: "var(--ink-2)", cursor: "pointer" }}>← All Letters</button>
+          <span style={{ color: "var(--border)" }}>|</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent)" }}>
+            Letter {selected! + 1} of {ALPHABET.length}
+          </span>
+        </div>
+
+        {/* Hero letter */}
+        <div style={{ textAlign: "center", padding: "28px 0 20px" }}>
+          <div style={{ fontSize: 110, lineHeight: 1.1, fontFamily: "var(--font-arabic)", color: "var(--accent)" }}>{letter.ar}</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)", marginTop: 10 }}>{letter.name}</div>
+          <div style={{ fontSize: 15, color: "var(--ink-2)", marginTop: 4, fontStyle: "italic" }}>/{letter.translit}/</div>
+          <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+            <span style={{ padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: detail.sun ? "rgba(200,100,0,0.12)" : "rgba(0,70,200,0.1)", color: detail.sun ? "#C86400" : "#0046C8" }}>
+              {detail.sun ? "☀ Sun Letter" : "☽ Moon Letter"}
+            </span>
+            {letter.nc && (
+              <span style={{ padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "rgba(100,0,100,0.1)", color: "#640064" }}>Non-Connecting</span>
+            )}
+            {group && (
+              <span style={{ padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: group.bg, color: group.color }}>{group.label}</span>
+            )}
+          </div>
+        </div>
+
+        {/* How it sounds */}
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 22px", marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>How it sounds</div>
+          <div style={{ fontSize: 17, fontWeight: 700, color: "var(--ink)", marginBottom: 8 }}>{detail.sound}</div>
+          <div style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.7 }}>{detail.tip}</div>
+        </div>
+
+        {/* 4 forms */}
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 22px", marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 16 }}>4 Positional Forms</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+            {forms.map(({ label, sub, form }) => (
+              <div key={label} style={{ textAlign: "center", padding: "14px 6px 10px", borderRadius: 8, background: "var(--bg)", border: "1px solid var(--border)" }}>
+                <div style={{ fontSize: 34, fontFamily: "var(--font-arabic)", color: "var(--ink)", direction: "rtl", lineHeight: 1.4, marginBottom: 8 }}>{form}</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "var(--ink)", textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</div>
+                <div style={{ fontSize: 9, color: "var(--ink-3)", marginTop: 2 }}>{sub}</div>
+              </div>
+            ))}
+          </div>
+          {letter.nc && (
+            <div style={{ marginTop: 14, padding: "10px 14px", borderRadius: 8, background: "rgba(196,149,42,0.08)", border: "1px solid rgba(196,149,42,0.2)", fontSize: 12, color: "#8A6020", lineHeight: 1.6 }}>
+              <strong>Non-connecting:</strong> This letter only connects to the letter before it, never to the one after. The letter following it starts a fresh stroke.
+            </div>
+          )}
+        </div>
+
+        {/* Example word */}
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 22px", marginBottom: 28 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>Example Word</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+            <div style={{ fontSize: 46, fontFamily: "var(--font-arabic)", color: "var(--ink)", direction: "rtl", lineHeight: 1.3 }}>{detail.example}</div>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: "var(--ink)" }}>{detail.exampleMeaning}</div>
+              <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 4 }}>Listen for the {letter.name} sound</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sun/Moon explanation */}
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 22px", marginBottom: 28 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>
+            {detail.sun ? "☀ Sun Letter — ال Assimilation" : "☽ Moon Letter — ال Stays Clear"}
+          </div>
+          {detail.sun ? (
+            <div style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.7 }}>
+              When <span style={{ fontFamily: "var(--font-arabic)", fontSize: 16 }}>ال</span> (the) comes before a sun letter, the <span style={{ fontFamily: "var(--font-arabic)", fontSize: 16 }}>ل</span> disappears into the letter.{" "}
+              <strong>al-{letter.name.split(" ")[0]}</strong> is pronounced as{" "}
+              <strong>a<span style={{ textDecoration: "underline" }}>{letter.translit.replace(/[^a-z]/g, "")}</span>-</strong>.{" "}
+              Example: <span style={{ fontFamily: "var(--font-arabic)", fontSize: 16 }}>الشَّمْس</span> = ash-shams (not al-shams).
+            </div>
+          ) : (
+            <div style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.7 }}>
+              When <span style={{ fontFamily: "var(--font-arabic)", fontSize: 16 }}>ال</span> (the) comes before a moon letter, you pronounce the <span style={{ fontFamily: "var(--font-arabic)", fontSize: 16 }}>ل</span> clearly.{" "}
+              <strong>al-{letter.name.split(" ")[0]}</strong> stays as <strong>al-</strong>.{" "}
+              Example: <span style={{ fontFamily: "var(--font-arabic)", fontSize: 16 }}>الْقَمَر</span> = al-qamar.
+            </div>
+          )}
+        </div>
+
+        {/* Prev / Next */}
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <button onClick={() => setSelected(Math.max(0, selected! - 1))} disabled={selected === 0}
+            style={{ padding: "10px 22px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--ink)", cursor: selected === 0 ? "not-allowed" : "pointer", opacity: selected === 0 ? 0.4 : 1, fontSize: 13, fontWeight: 600 }}>
+            ← Prev
+          </button>
+          <button onClick={() => setSelected(null)}
+            style={{ padding: "10px 22px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--ink-2)", cursor: "pointer", fontSize: 13 }}>
+            All Letters
+          </button>
+          <button onClick={() => setSelected(Math.min(ALPHABET.length - 1, selected! + 1))} disabled={selected === ALPHABET.length - 1}
+            style={{ padding: "10px 22px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--ink)", cursor: selected === ALPHABET.length - 1 ? "not-allowed" : "pointer", opacity: selected === ALPHABET.length - 1 ? 0.4 : 1, fontSize: 13, fontWeight: 600 }}>
+            Next →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Grid view ───────────────────────────────────────────────────────────────
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 5vw 80px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 0 28px" }}>
+    <div style={{ maxWidth: 940, margin: "0 auto", padding: "0 5vw 80px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 0 24px" }}>
         <button onClick={onBack} style={{ background: "none", border: "none", fontSize: 14, color: "var(--ink-2)", cursor: "pointer" }}>← Back</button>
         <span style={{ color: "var(--border)" }}>|</span>
         <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent)" }}>
-          Arabic Alphabet — 28 Letters
+          Lesson 1 — الْحُرُوف — The 28 Letters
         </span>
       </div>
-      <div className="gdsk-alpha-grid">
-        {ALPHABET.map((l, i) => (
-          <div key={i} className="gdsk-alpha-card">
-            <div className="font-arabic gdsk-alpha-letter">{l.ar}</div>
-            <div className="gdsk-alpha-name">{l.name}</div>
-            <div className="gdsk-alpha-translit">{l.translit}</div>
-            <div className="gdsk-alpha-forms font-arabic" style={{ direction: "rtl" }}>{l.forms}</div>
-            {l.nc && <div className="gdsk-alpha-nc">non-connecting</div>}
-          </div>
+
+      <div style={{ padding: "4px 0 20px" }}>
+        <p style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.75, maxWidth: 620, margin: 0 }}>
+          Arabic has 28 consonant letters. All vowels are added as small marks <em>(harakāt)</em>.
+          Every letter has up to 4 forms depending on its position in the word.
+          Letters flow <strong>right to left</strong>. Click any letter to learn how it sounds.
+        </p>
+      </div>
+
+      {/* Filter bar */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 22 }}>
+        {ALPHA_FILTERS.map(({ key, label }) => (
+          <button key={key} onClick={() => setFilter(key)} style={{
+            padding: "5px 13px", borderRadius: 20,
+            border: `1px solid ${filter === key ? "var(--accent)" : "var(--border)"}`,
+            background: filter === key ? "var(--accent)" : "var(--surface)",
+            color: filter === key ? "#fff" : "var(--ink-2)",
+            fontSize: 11, fontWeight: 600, cursor: "pointer",
+          }}>{label}</button>
         ))}
+      </div>
+
+      {/* Sun/Moon explainer — shown when one is selected */}
+      {(filter === "sun" || filter === "moon") && (
+        <div style={{ padding: "14px 18px", borderRadius: 10, background: "var(--surface)", border: "1px solid var(--border)", marginBottom: 20, fontSize: 13, color: "var(--ink-2)", lineHeight: 1.65 }}>
+          {filter === "sun"
+            ? "☀ Sun letters absorb the ل of ال. Writing: اَلشَّمْس — Reading: ash-shams. The doubled letter shows the assimilation (shaddah)."
+            : "☽ Moon letters keep the ل of ال fully pronounced. Writing: اَلْقَمَر — Reading: al-qamar."}
+        </div>
+      )}
+
+      {/* RTL letter grid */}
+      <div className="gdsk-alpha-grid" style={{ direction: "rtl" }}>
+        {filtered.map((l) => {
+          const d = LETTER_DETAIL[l.ar];
+          const grp = d ? ALPHA_GROUPS[d.group] : null;
+          const idx = ALPHABET.indexOf(l);
+          return (
+            <button key={l.ar} onClick={() => setSelected(idx)} className="gdsk-alpha-card gdsk-alpha-card-btn" style={{ direction: "ltr" }}>
+              <div className="font-arabic gdsk-alpha-letter">{l.ar}</div>
+              <div className="gdsk-alpha-name">{l.name}</div>
+              <div className="gdsk-alpha-translit">{l.translit}</div>
+              {d && (
+                <div style={{ marginTop: 5, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: d.sun ? "#C86400" : "#0046C8" }}>
+                    {d.sun ? "☀ sun" : "☽ moon"}
+                  </span>
+                  {grp && (
+                    <span style={{ fontSize: 8, fontWeight: 600, color: grp.color, background: grp.bg, padding: "1px 6px", borderRadius: 4 }}>
+                      {grp.label}
+                    </span>
+                  )}
+                  {l.nc && (
+                    <span style={{ fontSize: 8, color: "#C4952A", fontWeight: 700 }}>non-conn.</span>
+                  )}
+                </div>
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -1195,12 +1436,13 @@ const STYLES = `
   .hrkt-legend-name { font-size: 11px; color: rgba(255,255,255,0.55); }
 
   /* Alphabet */
-  .gdsk-alpha-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .gdsk-alpha-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
   .gdsk-alpha-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 12px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: box-shadow 0.15s; }
-  .gdsk-alpha-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
-  .gdsk-alpha-letter { font-size: 40px; color: var(--accent); line-height: 1.4; }
-  .gdsk-alpha-name { font-size: 13px; font-weight: 700; color: var(--ink); }
-  .gdsk-alpha-translit { font-size: 11px; color: var(--ink-3); }
+  .gdsk-alpha-card-btn { cursor: pointer; appearance: none; -webkit-appearance: none; text-align: center; }
+  .gdsk-alpha-card-btn:hover { box-shadow: 0 4px 18px rgba(0,0,0,0.10); border-color: var(--accent); }
+  .gdsk-alpha-letter { font-size: 42px; color: var(--accent); line-height: 1.4; }
+  .gdsk-alpha-name { font-size: 12px; font-weight: 700; color: var(--ink); }
+  .gdsk-alpha-translit { font-size: 10px; color: var(--ink-3); }
   .gdsk-alpha-forms { font-size: 13px; color: var(--ink-2); letter-spacing: 0.05em; }
   .gdsk-alpha-nc { font-size: 9px; color: #C4952A; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; background: rgba(196,149,42,0.1); padding: 2px 6px; border-radius: 4px; }
 
