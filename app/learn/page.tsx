@@ -186,10 +186,6 @@ function Hub({
         </button>
       </div>
 
-      <LevelSection title="Beginner"     skills={BEGINNER}     color="#1A7A3E" onStudy={onStudy} onDrill={onDrill} />
-      <LevelSection title="Intermediate" skills={INTERMEDIATE} color="#C4952A" onStudy={onStudy} onDrill={onDrill} />
-      <LevelSection title="Advanced"     skills={ADVANCED}     color="#1A6B4A" onStudy={onStudy} onDrill={onDrill} />
-
       <section style={{ marginBottom: 48 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#1A6B4A" }}>
@@ -230,6 +226,10 @@ function Hub({
           </Link>
         </div>
       </section>
+
+      <LevelSection title="Beginner"     skills={BEGINNER}     color="#1A7A3E" onStudy={onStudy} onDrill={onDrill} />
+      <LevelSection title="Intermediate" skills={INTERMEDIATE} color="#C4952A" onStudy={onStudy} onDrill={onDrill} />
+      <LevelSection title="Advanced"     skills={ADVANCED}     color="#1A6B4A" onStudy={onStudy} onDrill={onDrill} />
 
       <div className="gdsk-live-cta">
         <div>
