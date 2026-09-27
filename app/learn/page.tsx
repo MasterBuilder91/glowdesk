@@ -1486,10 +1486,10 @@ const STYLES = `
 
   /* Word Builder */
   .gdsk-wb-display { min-height: 120px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 20px; gap: 8px; }
-  .gdsk-wb-word { font-size: clamp(36px,6vw,60px); line-height: 1.6; letter-spacing: 0.02em; color: var(--ink); cursor: default; }
-  .gdsk-wb-letter { padding: 0 3px; border-radius: 4px; cursor: pointer; transition: background 0.12s; }
-  .gdsk-wb-letter:hover { background: rgba(26,107,74,0.1); }
-  .gdsk-wb-selected { background: rgba(196,149,42,0.18) !important; outline: 2px solid #C4952A; border-radius: 4px; }
+  .gdsk-wb-word { font-size: clamp(36px,6vw,60px); line-height: 1.6; color: var(--ink); cursor: default; }
+  .gdsk-wb-letter { cursor: pointer; border-bottom: 3px solid transparent; transition: border-color 0.12s; }
+  .gdsk-wb-letter:hover { border-bottom-color: rgba(26,107,74,0.4); }
+  .gdsk-wb-selected { border-bottom: 3px solid #C4952A !important; }
   .gdsk-wb-translit { font-size: 15px; color: var(--ink-3); letter-spacing: 0.05em; font-style: italic; }
   .gdsk-wb-match { font-size: 14px; padding: 6px 16px; border-radius: 8px; }
   .gdsk-wb-exact { background: rgba(26,122,62,0.08); color: var(--accent); }
