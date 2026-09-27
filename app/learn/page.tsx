@@ -194,6 +194,18 @@ function Hub({
           <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
         </div>
         <div className="gdsk-game-cards">
+          <div className="gdsk-game-card" onClick={onAlphabet}>
+            <div className="gdsk-game-icon font-arabic" style={{ fontSize: 28 }}>ا ب ت</div>
+            <div className="gdsk-game-title">Alphabet — Lesson 1</div>
+            <div className="gdsk-game-desc">Start here. 28 letters, why they go right to left, 4 forms each, and audio for every letter.</div>
+            <div className="gdsk-game-tag" style={{ color: "#4A1A6E" }}>First lesson</div>
+          </div>
+          <div className="gdsk-game-card" onClick={onHarakat}>
+            <div className="gdsk-game-icon font-arabic" style={{ fontSize: 22 }}>حَرَكَات</div>
+            <div className="gdsk-game-title">Harakat Drill</div>
+            <div className="gdsk-game-desc">Tap the correct floating harakah bubble (fatḥa, kasra, ḍamma, sukūn) to vowelize each letter.</div>
+            <div className="gdsk-game-tag" style={{ color: "#7A1A6B" }}>Vowel marks</div>
+          </div>
           <div className="gdsk-game-card" onClick={onBlaster}>
             <div className="gdsk-game-icon">☄️</div>
             <div className="gdsk-game-title">Letter Blaster</div>
@@ -206,20 +218,8 @@ function Hub({
             <div className="gdsk-game-desc">Type on a real Arabic keyboard, add vowel marks, and get live dictionary feedback.</div>
             <div className="gdsk-game-tag" style={{ color: "#1A6B4A" }}>Interactive tool</div>
           </div>
-          <div className="gdsk-game-card" onClick={onAlphabet}>
-            <div className="gdsk-game-icon">ا</div>
-            <div className="gdsk-game-title">Alphabet Chart</div>
-            <div className="gdsk-game-desc">All 28 Arabic letters with name, transliteration, positional forms, and connection notes.</div>
-            <div className="gdsk-game-tag" style={{ color: "#4A1A6E" }}>Reference</div>
-          </div>
-          <div className="gdsk-game-card" onClick={onHarakat}>
-            <div className="gdsk-game-icon">حَرَكَات</div>
-            <div className="gdsk-game-title">Harakat Drill</div>
-            <div className="gdsk-game-desc">Tap the correct floating harakah bubble (fatḥa, kasra, ḍamma, sukūn) to vowelize each letter.</div>
-            <div className="gdsk-game-tag" style={{ color: "#7A1A6B" }}>Vowel marks</div>
-          </div>
           <Link href="/sarf" className="gdsk-game-card" style={{ textDecoration: "none", color: "inherit" }}>
-            <div className="gdsk-game-icon" style={{ fontFamily: "serif" }}>الصَّرْف</div>
+            <div className="gdsk-game-icon font-arabic" style={{ fontFamily: "serif" }}>الصَّرْف</div>
             <div className="gdsk-game-title">Sarf Trainer</div>
             <div className="gdsk-game-desc">Conjugate 181+ verbs across all 10 forms + quadriliteral, 14 pronoun slots, active/passive.</div>
             <div className="gdsk-game-tag" style={{ color: "#1A6B4A" }}>Morphology drill</div>
@@ -855,9 +855,20 @@ const ALPHA_FILTERS = [
   { key: "nc",             label: "Non-Connecting" },
 ];
 
+const AR_LETTER_NAMES: Record<string, string> = {
+  "ا": "أَلِف", "ب": "بَاء", "ت": "تَاء", "ث": "ثَاء", "ج": "جِيم",
+  "ح": "حَاء", "خ": "خَاء", "د": "دَال", "ذ": "ذَال", "ر": "رَاء",
+  "ز": "زَاي", "س": "سِين", "ش": "شِين", "ص": "صَاد", "ض": "ضَاد",
+  "ط": "طَاء", "ظ": "ظَاء", "ع": "عَيْن", "غ": "غَيْن", "ف": "فَاء",
+  "ق": "قَاف", "ك": "كَاف", "ل": "لَام", "م": "مِيم", "ن": "نُون",
+  "ه": "هَاء", "و": "وَاو", "ي": "يَاء", "ى": "أَلِف مَقْصُورَة",
+};
+
 function AlphabetRef({ onBack }: { onBack: () => void }) {
+  const [showIntro, setShowIntro] = useState(true);
   const [selected, setSelected] = useState<number | null>(null);
   const [filter, setFilter] = useState("all");
+  const [playing, setPlaying] = useState(false);
 
   const letter = selected !== null ? ALPHABET[selected] : null;
   const detail = letter ? LETTER_DETAIL[letter.ar] : null;
@@ -870,6 +881,82 @@ function AlphabetRef({ onBack }: { onBack: () => void }) {
     if (filter === "nc")   return !!l.nc;
     return d?.group === filter;
   });
+
+  async function playLetter(ar: string, exampleWord: string) {
+    if (playing) return;
+    setPlaying(true);
+    const arName = AR_LETTER_NAMES[ar] || ar;
+    await speak(arName);
+    setTimeout(async () => {
+      await speak(exampleWord);
+      setPlaying(false);
+    }, 900);
+  }
+
+  // ── Intro screen ────────────────────────────────────────────────────────────
+  if (showIntro) {
+    return (
+      <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 5vw 80px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 0 32px" }}>
+          <button onClick={onBack} style={{ background: "none", border: "none", fontSize: 14, color: "var(--ink-2)", cursor: "pointer" }}>← Back</button>
+          <span style={{ color: "var(--border)" }}>|</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent)" }}>Lesson 1 — الْحُرُوف</span>
+        </div>
+
+        {/* RTL demo */}
+        <div style={{ textAlign: "center", padding: "24px 0 20px" }}>
+          <div style={{ fontSize: 36, fontFamily: "var(--font-arabic)", color: "var(--accent)", direction: "rtl", letterSpacing: 6 }}>
+            ي ← و ← ه ← ن ← م ← ل ← ك ← ق ← ف ← غ ← ع ← ظ ← ط ← ض ← ص ← ش ← س ← ز ← ر ← ذ ← د ← خ ← ح ← ج ← ث ← ت ← ب ← ا
+          </div>
+          <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 10, letterSpacing: "0.08em" }}>
+            ← Arabic flows this direction — right to left
+          </div>
+        </div>
+
+        {/* Why RTL */}
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "22px 24px", marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 10 }}>
+            Why does Arabic go right to left?
+          </div>
+          <div style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.8 }}>
+            Arabic belongs to the Semitic family of scripts — the same family as Hebrew and Aramaic. These languages have written right to left since ancient times, when scribes would inscribe letters into stone and clay tablets moving from right to left. That tradition was preserved through thousands of years. When the Quran was revealed to the Prophet Muhammad ﷺ in the 7th century, it was written in this same right-to-left direction, and that is how every Arabic text — Quranic and otherwise — flows to this day.
+          </div>
+          <div style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.8, marginTop: 10 }}>
+            It is not backwards. It is simply a different starting point — the right edge instead of the left. Once your eye adjusts, it feels completely natural.
+          </div>
+        </div>
+
+        {/* What you'll learn */}
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "22px 24px", marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 12 }}>
+            What you are about to learn
+          </div>
+          {[
+            { icon: "٢٨", title: "28 consonant letters", body: "Arabic writes only consonants. There are no separate vowel letters — the vowels are added as tiny marks above or below the letters." },
+            { icon: "٤", title: "4 shapes per letter", body: "Every letter changes form depending on where it appears in a word: alone, at the start, in the middle, or at the end." },
+            { icon: "☀", title: "Sun & Moon letters", body: "14 letters cause the definite article ال to assimilate — the 'l' sound merges into the letter. The other 14 keep the 'l' clear. You will learn which is which." },
+            { icon: "♪", title: "Tap to hear each letter", body: "Every letter has an audio button. You will hear the letter's Arabic name and an example word spoken by a native Arabic voice." },
+          ].map(({ icon, title, body }) => (
+            <div key={title} style={{ display: "flex", gap: 14, marginBottom: 14 }}>
+              <div style={{ minWidth: 32, height: 32, borderRadius: 8, background: "rgba(26,122,62,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, color: "var(--accent)", fontFamily: "var(--font-arabic)", flexShrink: 0 }}>{icon}</div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--ink)", marginBottom: 3 }}>{title}</div>
+                <div style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.6 }}>{body}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <button onClick={() => setShowIntro(false)} style={{
+          width: "100%", padding: "16px 0", borderRadius: 12, border: "none",
+          background: "var(--accent)", color: "#fff", fontSize: 16, fontWeight: 700,
+          cursor: "pointer", letterSpacing: "0.04em",
+        }}>
+          Begin Lesson — Meet the Letters →
+        </button>
+      </div>
+    );
+  }
 
   // ── Letter detail view ──────────────────────────────────────────────────────
   if (letter && detail) {
@@ -896,7 +983,19 @@ function AlphabetRef({ onBack }: { onBack: () => void }) {
           <div style={{ fontSize: 110, lineHeight: 1.1, fontFamily: "var(--font-arabic)", color: "var(--accent)" }}>{letter.ar}</div>
           <div style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)", marginTop: 10 }}>{letter.name}</div>
           <div style={{ fontSize: 15, color: "var(--ink-2)", marginTop: 4, fontStyle: "italic" }}>/{letter.translit}/</div>
-          <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+
+          {/* Audio button */}
+          <button onClick={() => playLetter(letter.ar, detail.example)} disabled={playing} style={{
+            marginTop: 16, padding: "10px 28px", borderRadius: 30, border: "2px solid var(--accent)",
+            background: playing ? "var(--accent)" : "transparent",
+            color: playing ? "#fff" : "var(--accent)",
+            fontSize: 14, fontWeight: 700, cursor: playing ? "default" : "pointer",
+            transition: "all 0.15s", letterSpacing: "0.04em",
+          }}>
+            {playing ? "▶ Playing…" : "♪ Hear it"}
+          </button>
+
+          <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
             <span style={{ padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: detail.sun ? "rgba(200,100,0,0.12)" : "rgba(0,70,200,0.1)", color: detail.sun ? "#C86400" : "#0046C8" }}>
               {detail.sun ? "☀ Sun Letter" : "☽ Moon Letter"}
             </span>
